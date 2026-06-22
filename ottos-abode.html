@@ -292,14 +292,17 @@ button{font-family:inherit}
 .nv-back svg{width:15px;height:15px;stroke:currentColor}
 .nv-title{font-weight:700;color:var(--text-strong);font-size:15px}
 .nv-sub{font-size:12px;color:var(--text-muted)}
-.nv-canvas{flex:1;position:relative;overflow:hidden}
-.nv-inner{position:absolute;inset:0}
+.nv-canvas{flex:1;display:flex;min-height:0}
+.nv-graph{flex:1;position:relative;overflow:hidden;min-width:0}
+.nv-inner{position:absolute;inset:0;transform-origin:0 0}
 .edges{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .edges path{fill:none;stroke:var(--slate-300);stroke-width:2}
 .edges path.live{stroke:var(--indigo-500);stroke-dasharray:5 6;animation:dash 14s linear infinite}
-.gnode{position:absolute;min-width:150px;max-width:190px;background:var(--white);
+.gnode{position:absolute;min-width:150px;max-width:190px;background:var(--white);cursor:pointer;
   border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);
-  padding:11px 13px;transition:border-color 200ms,box-shadow 200ms}
+  padding:11px 13px;transition:border-color 200ms,box-shadow 200ms,outline-color 160ms}
+.gnode:hover{border-color:var(--border-strong)}
+.gnode.selected{outline:2px solid var(--indigo-600);outline-offset:3px}
 .gnode .gn-eyebrow{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);font-weight:600}
 .gnode .gn-title{font-size:13px;font-weight:600;color:var(--text-strong);margin-top:3px;line-height:1.3}
 .gnode .gn-meta{font-size:11px;color:var(--text-muted);margin-top:5px;font-family:var(--font-mono)}
@@ -313,6 +316,53 @@ button{font-family:inherit}
   border-radius:var(--radius-pill);box-shadow:var(--shadow-md);padding:8px 16px;font-size:13px;color:var(--text-body)}
 .nv-status .spin{width:13px;height:13px;border:2px solid var(--indigo-200);border-top-color:var(--indigo-600);border-radius:50%;animation:spin 1s linear infinite}
 .nv-status .mono{color:var(--text-muted);font-size:12px}
+
+/* minimap — overview of the node framework, bottom-right (not part of canvas) */
+.minimap{position:absolute;right:16px;bottom:16px;width:172px;z-index:6;
+  background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-md);
+  box-shadow:var(--shadow-md);padding:7px 8px 8px;user-select:none}
+.minimap .mm-head{display:flex;align-items:center;justify-content:space-between;
+  font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);font-weight:600;margin-bottom:6px}
+.minimap .mm-head svg{width:12px;height:12px;stroke:var(--text-faint)}
+.mm-stage{position:relative;width:100%;height:96px;background:var(--slate-50);
+  border:1px solid var(--slate-150);border-radius:var(--radius-sm);overflow:hidden}
+.mm-node{position:absolute;border-radius:2px;background:var(--slate-300);cursor:pointer;transition:background 160ms,box-shadow 160ms}
+.mm-node:hover{background:var(--slate-400)}
+.mm-node.done{background:var(--green-600)}
+.mm-node.active{background:var(--indigo-600)}
+.mm-node.selected{box-shadow:0 0 0 1.5px var(--indigo-700),0 0 0 3px var(--indigo-100)}
+
+/* inspector panel (right) — instructions / code for the selected node */
+.nv-detail{width:340px;flex:0 0 auto;background:var(--white);border-left:1px solid var(--border-subtle);
+  display:flex;flex-direction:column;min-height:0}
+.nv-detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:32px;text-align:center;color:var(--text-faint)}
+.nv-detail-empty svg{width:30px;height:30px;stroke:var(--slate-300)}
+.nv-detail-empty .t{font-size:13px;color:var(--text-muted);max-width:200px;line-height:1.5}
+.nv-detail-body{flex:1;display:flex;flex-direction:column;min-height:0}
+.nd-head{padding:16px 18px 12px;border-bottom:1px solid var(--border-subtle)}
+.nd-head .nd-eyebrow{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--indigo-600);font-weight:600}
+.nd-head .nd-title{font-size:16px;font-weight:700;color:var(--text-strong);margin-top:4px;line-height:1.25}
+.nd-head .nd-meta{font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);
+  display:inline-block;background:var(--slate-50);border:1px solid var(--border-subtle);border-radius:5px;padding:2px 7px}
+.nd-tabs{display:flex;gap:4px;padding:10px 14px 0}
+.nd-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 10px;border:1px solid var(--border-subtle);background:var(--white);
+  border-radius:var(--radius-md);font-size:12.5px;font-weight:600;color:var(--text-muted);cursor:pointer;
+  transition:background 140ms,color 140ms,border-color 140ms}
+.nd-tab svg{width:14px;height:14px;stroke:currentColor}
+.nd-tab:hover{background:var(--surface-hover)}
+.nd-tab.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-soft-border)}
+.nd-content{flex:1;overflow-y:auto;padding:14px 18px 20px}
+.nd-instr{font-size:13.5px;line-height:1.6;color:var(--text-body)}
+.nd-instr .lead{color:var(--text-strong);font-weight:600;display:block;margin-bottom:6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.nd-code{margin:0;font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--slate-700);
+  background:var(--slate-50);border:1px solid var(--border-subtle);border-radius:var(--radius-md);
+  padding:13px 14px;white-space:pre;overflow-x:auto;tab-size:2}
+.nd-code .kw{color:var(--indigo-700);font-weight:600}
+.nd-code .cm{color:var(--slate-400)}
+.nd-code .st{color:var(--green-700)}
+@media(max-width:900px){.nv-detail{width:280px}}
 
 /* ============================================================
    MEMORY + LOGS VIEWS (sidebar nav)
@@ -475,11 +525,35 @@ button{font-family:inherit}
             <div style="margin-left:auto" id="nvBadge"></div>
           </div>
           <div class="nv-canvas">
-            <div class="nv-inner" id="nvInner">
-              <svg class="edges" id="nvEdges"></svg>
-              <!-- nodes injected -->
+            <div class="nv-graph" id="nvGraph">
+              <div class="nv-inner" id="nvInner">
+                <svg class="edges" id="nvEdges"></svg>
+                <!-- nodes injected -->
+              </div>
+              <div class="nv-status"><span class="spin"></span><span id="nvStatus">—</span></div>
+              <div class="minimap" id="nvMinimap">
+                <div class="mm-head"><span>Overview</span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg></div>
+                <div class="mm-stage" id="nvMinimapStage"></div>
+              </div>
             </div>
-            <div class="nv-status"><span class="spin"></span><span id="nvStatus">—</span></div>
+            <aside class="nv-detail" id="nvDetail">
+              <div class="nv-detail-empty" id="nvDetailEmpty">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+                <div class="t">Select a node to see what it does — and the code behind it.</div>
+              </div>
+              <div class="nv-detail-body" id="nvDetailBody" style="display:none">
+                <div class="nd-head">
+                  <div class="nd-eyebrow" id="ndEyebrow">—</div>
+                  <div class="nd-title" id="ndTitle">—</div>
+                  <span class="nd-meta" id="ndMeta">—</span>
+                </div>
+                <div class="nd-tabs">
+                  <button class="nd-tab active" data-tab="desc" id="ndTabDesc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>Instructions</button>
+                  <button class="nd-tab" data-tab="code" id="ndTabCode"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>Code</button>
+                </div>
+                <div class="nd-content" id="ndContent"></div>
+              </div>
+            </aside>
           </div>
         </div>
       </div>
@@ -574,6 +648,60 @@ const AGENTS = [
    layout:{mon:[60,150],win:[300,150],gate:[540,60],queue:[790,60],wait:[540,290]},
    statusLines:['Monitoring escalation-ready items…','Fetching the resurfacing window…','Evaluating cost and drop-rate…','Queuing for the right window…']},
 ];
+
+/* per-node inspector content — instructions + code, keyed by agent.node */
+const NODE_DETAIL = {
+  ingestion:{
+    recv:{desc:'Receives a raw commitment signal — manual input or a forwarded message. Nothing is parsed yet; the text is captured verbatim with a timestamp.',
+      code:`on signal(raw):\n  return {\n    text: raw.text,\n    source: raw.source,   // "manual" | "inbox"\n    received_at: now()\n  }`},
+    parse:{desc:'Runs an NLU pass to pull the structured fields Otto reasons over: who the commitment is to, its category, and any implied deadline.',
+      code:`parsed = nlu(signal.text)\nreturn {\n  who:      parsed.person,    // "Maya"\n  category: parsed.category,  // "Design"\n  deadline: parsed.deadline   // "Fri"\n}`},
+    tag:{desc:'Assigns a relationship-cost weight. Design and mentorship default to high; reviews and follow-ups skew low. This weight drives later decay and escalation.',
+      code:`weight = COST[parsed.category] ?? 0.5\nif (parsed.person in close_ties)\n  weight += 0.1\nreturn clamp(weight, 0, 1)  // high ≥ .8`},
+    write:{desc:'Commits the parsed, weighted signal to the short-term buffer at age 0h. From here the Aging worker owns hold-tracking.',
+      code:`shortTerm.unshift({\n  ...parsed,\n  weight,\n  age: 0,\n  id: nextId()\n})`},
+    hand:{desc:'Passes a reference — not a copy — to the Aging worker, so a single source of truth ages in exactly one place.',
+      code:`emit("aging.track", { ref: signal.id })`},
+  },
+  aging:{
+    read:{desc:'On every tick, walks each held commitment in the buffer. Read-only — it gathers what to age without mutating anything yet.',
+      code:`for (const s of shortTerm) {\n  evaluate(s)   // age → decay → threshold\n}`},
+    age:{desc:'Advances hold-time. Age is the raw clock since ingestion, independent of how important the commitment is.',
+      code:`s.age += elapsedHours()   // e.g. +6h`},
+    decay:{desc:'Recomputes how urgent the held item feels. Decay rises with age but is scaled by relationship cost — costly commitments rot slower into irrelevance, faster into escalation.',
+      code:`const decay = f(s.age, s.weight)\n// higher weight → steeper urgency curve\ns.urgency = sigmoid(decay)`},
+    thr:{desc:'The branch point. Compares age against a per-category threshold. Crossing it means the item can no longer just sit in the buffer.',
+      code:`if (s.age >= threshold(s.category)\n    && s.weight >= 0.6) {\n  goto mark\n} else {\n  goto hold\n}`},
+    mark:{desc:'Flags the item “threshold approaching” and pings the Pattern worker to check whether history says this one will be dropped.',
+      code:`s.flagged = true\nemit("pattern.check", { ref: s.id })`},
+    hold:{desc:'Keeps holding. Low-cost items that never cross the threshold simply expire from the buffer after 72h, with no resurfacing.',
+      code:`if (s.age >= 72) evict(s)\n// silent — no escalation`},
+  },
+  pattern:{
+    lt:{desc:'Reads the long-term model for nodes matching this commitment’s person and category — the learned behaviour, not a log.',
+      code:`const nodes = longTerm.filter(n =>\n  n.person   === s.who ||\n  n.category === s.category)`},
+    xref:{desc:'Scores how well the held signal matches each learned pattern — similarity across person, category and context.',
+      code:`const match = best(nodes, n =>\n  similarity(s, n))`},
+    conf:{desc:'Decision gate. A match at or above 0.80 confidence is treated as a confirmed behavioural pattern.',
+      code:`if (match.conf >= 0.80) goto verdict\nelse                    goto upd  // weak / new`},
+    verdict:{desc:'Returns the verdict to the Aging and Escalation workers: confirmed drop-risk, or safe to keep holding.',
+      code:`emit("verdict", {\n  ref: s.id,\n  confirmed: true,\n  conf: match.conf\n})`},
+    upd:{desc:'When a short-term signal recurs, strengthens (or crystallises) the matching long-term node — this is how holding becomes understanding.',
+      code:`if (recurring(s)) {\n  node.conf = min(node.conf + .03, .97)\n  node.seen += 1\n}`},
+  },
+  escalation:{
+    mon:{desc:'Watches for commitments the Aging + Pattern pipeline has marked escalation-ready. Passive until something qualifies.',
+      code:`const ready = items.filter(i =>\n  i.state === "escalation_ready")`},
+    win:{desc:'Looks up the optimal resurfacing window from the long-term model — e.g. Sunday evenings are high-reflection.',
+      code:`const window = model.bestWindow(\n  s.who, s.category)\n// → "Sun eve · 19:30"`},
+    gate:{desc:'The final guard. Only high relationship cost AND a confirmed drop-rate get queued. Everything else waits another tick.',
+      code:`if (s.cost === "high"\n    && verdict.confirmed) {\n  goto queue\n} else {\n  goto wait\n}`},
+    queue:{desc:'Places the item on the escalation queue, ranked by cost × urgency, with reasoning and memory refs attached. The decision is made here — delivery happens elsewhere.',
+      code:`queue.push({\n  ref: s.id, window,\n  reason, memRefs,\n  rank: cost * urgency\n})`},
+    wait:{desc:'Holds and re-evaluates next tick. Otto never delivers early — the queue waits for the window, not the other way around.',
+      code:`defer(s)   // re-check next tick\n// never deliver before the window`},
+  },
+};
 
 let shortTerm = [
   {id:'s0', txt:'Maya: lock the design system by Friday', who:'Maya', cat:'Design', age:30, weight:.9},
@@ -926,24 +1054,107 @@ function enqueue(s, idx, p){
 /* ============================================================
    NODE VIEW
    ============================================================ */
-let nodeAnim=null;
+let nodeAnim=null, nvAgent=null, nvSelected=null, nvTab='desc';
+const NODE_W=176, NODE_H=70;   // nominal node box for bounds/minimap
+
+function graphBounds(a){
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  a.nodes.forEach(n=>{const [x,y]=a.layout[n.id];
+    minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x+NODE_W);maxY=Math.max(maxY,y+NODE_H);});
+  return {minX,minY,maxX,maxY,w:maxX-minX,h:maxY-minY};
+}
+function fitGraph(){
+  if(!nvAgent) return;
+  const g=document.getElementById('nvGraph');
+  const gw=g.clientWidth, gh=g.clientHeight;
+  if(!gw||!gh) return;
+  const b=graphBounds(nvAgent), pad=56;
+  const scale=Math.min((gw-2*pad)/b.w,(gh-2*pad)/b.h,1.15);
+  const tx=(gw-b.w*scale)/2 - b.minX*scale;
+  const ty=(gh-b.h*scale)/2 - b.minY*scale;
+  document.getElementById('nvInner').style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+}
+function buildMinimap(a){
+  const stage=document.getElementById('nvMinimapStage');
+  stage.innerHTML='';
+  const W=stage.clientWidth||156, H=stage.clientHeight||96, pad=7;
+  const b=graphBounds(a);
+  const scale=Math.min((W-2*pad)/b.w,(H-2*pad)/b.h);
+  a.nodes.forEach(n=>{
+    const [x,y]=a.layout[n.id];
+    const m=document.createElement('div');
+    m.className='mm-node'; m.dataset.id=n.id;
+    m.style.left=(pad+(x-b.minX)*scale)+'px';
+    m.style.top=(pad+(y-b.minY)*scale)+'px';
+    m.style.width=Math.max(8,NODE_W*scale)+'px';
+    m.style.height=Math.max(5,NODE_H*scale)+'px';
+    m.addEventListener('click',()=>selectNode(a,n.id));
+    stage.appendChild(m);
+  });
+}
+function syncMini(){
+  document.querySelectorAll('#nvMinimapStage .mm-node').forEach(m=>{
+    const g=document.querySelector(`#nvInner .gnode[data-id="${m.dataset.id}"]`);
+    if(!g) return;
+    m.classList.toggle('done', g.classList.contains('done'));
+    m.classList.toggle('active', g.classList.contains('active'));
+    m.classList.toggle('selected', g.classList.contains('selected'));
+  });
+}
+function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function highlightCode(code){
+  return escapeHtml(code).split('\n').map(line=>{
+    const ci=line.indexOf('//');
+    let codePart=line, comment='';
+    if(ci>=0){codePart=line.slice(0,ci);comment=`<span class="cm">${line.slice(ci)}</span>`;}
+    codePart=codePart.replace(/(&quot;|&#39;|")([^"&]*)(&quot;|&#39;|")/g,m=>`<span class="st">${m}</span>`);
+    codePart=codePart.replace(/\b(on|return|if|else|for|const|let|goto|emit|defer|in|filter|push|unshift|min|max|clamp|now|sigmoid|similarity|best|recurring|evict|evaluate)\b/g,'<span class="kw">$1</span>');
+    return codePart+comment;
+  }).join('\n');
+}
+function renderDetail(){
+  if(!nvSelected||!nvAgent) return;
+  const d=(NODE_DETAIL[nvAgent.key]||{})[nvSelected]||{desc:'—',code:'//'};
+  const c=document.getElementById('ndContent');
+  document.getElementById('ndTabDesc').classList.toggle('active',nvTab==='desc');
+  document.getElementById('ndTabCode').classList.toggle('active',nvTab==='code');
+  if(nvTab==='code'){ c.innerHTML=`<pre class="nd-code">${highlightCode(d.code)}</pre>`; }
+  else { c.innerHTML=`<div class="nd-instr"><span class="lead">What this node does</span>${d.desc}</div>`; }
+}
+function selectNode(a,id){
+  nvSelected=id;
+  document.querySelectorAll('#nvInner .gnode').forEach(g=>g.classList.toggle('selected',g.dataset.id===id));
+  syncMini();
+  const n=a.nodes.find(x=>x.id===id);
+  document.getElementById('nvDetailEmpty').style.display='none';
+  document.getElementById('nvDetailBody').style.display='flex';
+  document.getElementById('ndEyebrow').textContent=n.eyebrow;
+  document.getElementById('ndTitle').textContent=n.t;
+  document.getElementById('ndMeta').textContent=n.meta;
+  renderDetail();
+}
 function openNode(key){
   const a=AGENTS.find(x=>x.key===key);
+  nvAgent=a; nvSelected=null; nvTab='desc';
   document.getElementById('crumbView').textContent=a.name+' · workflow';
   document.getElementById('nvTitle').textContent=a.name+' Worker';
   document.getElementById('nvSub').textContent=a.sub;
   document.getElementById('nvBadge').innerHTML=`<span class="badge ${a.status}"><span class="bd"></span>${statusLabel(a.status)}</span>`;
+  // reset inspector to empty
+  document.getElementById('nvDetailEmpty').style.display='flex';
+  document.getElementById('nvDetailBody').style.display='none';
   const inner=document.getElementById('nvInner');
-  // clear old nodes
+  inner.style.transform='';
   inner.querySelectorAll('.gnode').forEach(n=>n.remove());
   const edges=document.getElementById('nvEdges');
-  // place nodes
+  // place nodes (clickable)
   a.nodes.forEach(n=>{
     const pos=a.layout[n.id];
     const el=document.createElement('div');
     el.className='gnode'; el.dataset.id=n.id;
     el.style.left=pos[0]+'px'; el.style.top=pos[1]+'px';
     el.innerHTML=`<div class="gn-eyebrow">${n.eyebrow}</div><div class="gn-title">${n.t}</div><div class="gn-meta">${n.meta}</div>`;
+    el.addEventListener('click',(e)=>{e.stopPropagation();selectNode(a,n.id);});
     inner.appendChild(el);
   });
   // draw edges (curved)
@@ -956,7 +1167,9 @@ function openNode(key){
 
   document.getElementById('nodeview').classList.add('open');
   if(currentView==='workplace') document.getElementById('contextPanel').style.display='none';
-  // animate progress through nodes
+  fitGraph(); buildMinimap(a); selectNode(a,a.nodes[0].id);
+
+  // live execution pointer through nodes
   let i=0;
   const order=a.nodes.map(n=>n.id);
   const step=()=>{
@@ -967,11 +1180,11 @@ function openNode(key){
       el.querySelector('.tick')?.remove();
       if(oi<i){ el.insertAdjacentHTML('beforeend',`<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`); }
     });
-    // live edge
     edges.querySelectorAll('path').forEach(p=>p.classList.remove('live'));
     const curId=order[i], nextId=order[Math.min(i+1,order.length-1)];
     const le=edges.querySelector(`[data-edge="${curId}-${nextId}"]`); if(le) le.classList.add('live');
     document.getElementById('nvStatus').innerHTML = a.statusLines[Math.min(i,a.statusLines.length-1)];
+    syncMini();
     i=(i+1)%order.length;
   };
   step();
@@ -983,8 +1196,11 @@ function closeNode(){
   document.getElementById('crumbView').textContent='Workplace';
   if(currentView==='workplace') document.getElementById('contextPanel').style.display='';
   clearInterval(nodeAnim);
+  nvAgent=null;
 }
 document.getElementById('nvBack').addEventListener('click',closeNode);
+document.getElementById('ndTabDesc').addEventListener('click',()=>{nvTab='desc';renderDetail();});
+document.getElementById('ndTabCode').addEventListener('click',()=>{nvTab='code';renderDetail();});
 document.getElementById('ctxToggle').addEventListener('click',()=>document.getElementById('contextPanel').classList.toggle('show'));
 
 /* ============================================================
@@ -1098,7 +1314,7 @@ document.getElementById('cmdInput').addEventListener('keydown',e=>{if(e.key==='E
    ============================================================ */
 window.__ottoResume=function(){ if(window.__ottoStopped){window.__ottoPause=false;window.__ottoStopped=false;requestAnimationFrame(frame);} };
 let resizeT;
-window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{computeLayout();applyLayout();},160);});
+window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{computeLayout();applyLayout();if(nvAgent){fitGraph();buildMinimap(nvAgent);syncMini();}},160);});
 function boot(){
   buildCanvas();
   const wrap=document.getElementById('canvasWrap');

@@ -1,0 +1,7 @@
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+*.log
+
+# Node (only if a local serve ever pulls deps)
+node_modules/

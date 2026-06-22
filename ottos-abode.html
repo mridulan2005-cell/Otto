@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Otto's Abode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CURRICULA TOKENS (subset, from the supplied design system)
+   ============================================================ */
+:root{
+  --white:#ffffff;
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-150:#eceff3; --slate-200:#e2e8f0;
+  --slate-300:#cbd5e1; --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569;
+  --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+  --indigo-50:#eef2ff; --indigo-100:#e0e7ff; --indigo-200:#c7d2fe;
+  --indigo-500:#6366f1; --indigo-600:#4f46e5; --indigo-700:#4338ca;
+  --green-50:#dcfce7; --green-100:#bbf7d0; --green-600:#16a34a; --green-700:#15803d;
+  --amber-50:#fef3c7; --amber-600:#d97706; --amber-700:#b45309;
+  --red-50:#fee2e2; --red-600:#dc2626; --red-700:#b91c1c;
+
+  --surface-page:var(--slate-50); --surface-card:var(--white);
+  --surface-sunken:var(--slate-100); --surface-hover:var(--slate-100); --surface-active:var(--slate-150);
+  --text-strong:var(--slate-900); --text-body:var(--slate-700); --text-muted:var(--slate-500); --text-faint:var(--slate-400);
+  --border-subtle:var(--slate-200); --border-strong:var(--slate-300); --border-focus:var(--indigo-500);
+  --accent:var(--indigo-600); --accent-hover:var(--indigo-700); --accent-soft:var(--indigo-50); --accent-soft-border:var(--indigo-100);
+
+  --font-sans:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+
+  --radius-sm:6px; --radius-md:8px; --radius-lg:12px; --radius-xl:16px; --radius-2xl:20px; --radius-pill:999px;
+  --shadow-xs:0 1px 2px rgba(15,23,42,.04);
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --shadow-md:0 4px 12px rgba(15,23,42,.07),0 1px 3px rgba(15,23,42,.05);
+  --shadow-lg:0 12px 32px rgba(15,23,42,.10),0 2px 6px rgba(15,23,42,.05);
+  --ease-standard:cubic-bezier(0.2,0,0,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+
+  --sidebar-width:212px;
+  --context-width:328px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--surface-page);
+  color:var(--text-body);
+  font-family:var(--font-sans);
+  font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);font-weight:600}
+::selection{background:var(--indigo-100)}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--slate-200);border-radius:20px;border:3px solid var(--white);background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:var(--slate-300);background-clip:padding-box}
+button{font-family:inherit}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.app{display:flex;flex-direction:column;height:100vh}
+
+.topbar{
+  height:54px;flex:0 0 auto;
+  display:flex;align-items:center;gap:14px;
+  padding:0 18px;
+  background:var(--white);
+  border-bottom:1px solid var(--border-subtle);
+}
+.topbar .mark{display:flex;align-items:center;gap:10px}
+.topbar .mark .wm{font-weight:700;color:var(--text-strong);letter-spacing:-.01em;font-size:15px}
+.topbar .mark .wm .dim{color:var(--text-faint);font-weight:500}
+.topbar .crumb{display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:13px}
+.topbar .crumb svg{width:14px;height:14px}
+.topbar-spacer{flex:1}
+.otto-state{
+  display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);
+  padding:6px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);background:var(--white);
+}
+.otto-state .dot{width:8px;height:8px;border-radius:50%;background:var(--green-600)}
+.otto-state.alert .dot{background:var(--amber-600)}
+.otto-state.alert{border-color:var(--amber-600);color:var(--amber-700);background:var(--amber-50)}
+
+.body{flex:1;display:flex;min-height:0}
+
+/* ---- sidebar ---- */
+.sidebar{
+  width:var(--sidebar-width);flex:0 0 auto;
+  background:var(--white);border-right:1px solid var(--border-subtle);
+  display:flex;flex-direction:column;padding:16px 12px;gap:4px;
+}
+.wp-btn{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 11px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);
+  background:var(--white);color:var(--text-strong);font-weight:600;font-size:13.5px;cursor:pointer;
+  box-shadow:var(--shadow-xs);transition:background var(--ease-standard) 160ms;
+}
+.wp-btn:hover{background:var(--surface-hover)}
+.wp-btn .sq{width:18px;height:18px;border-radius:5px;background:var(--slate-900);display:grid;place-items:center}
+.wp-btn .sq i{display:block;width:9px;height:1.8px;background:#fff;border-radius:2px;position:relative}
+.wp-btn .sq i::before,.wp-btn .sq i::after{content:"";position:absolute;left:0;width:9px;height:1.8px;border-radius:2px}
+.wp-btn .sq i::before{top:-3px;background:var(--indigo-500)}
+.wp-btn .sq i::after{top:3px;width:6px;background:var(--slate-400)}
+.nav{margin-top:14px;display:flex;flex-direction:column;gap:2px}
+.nav .nh{padding:6px 11px 4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);font-weight:600}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 11px;border-radius:var(--radius-md);
+  color:var(--text-body);font-size:13.5px;font-weight:500;cursor:pointer;
+  position:relative;border-left:3px solid transparent;
+  transition:background var(--ease-standard) 140ms,color 140ms;
+}
+.nav-item svg{width:16px;height:16px;stroke:currentColor;flex:0 0 auto}
+.nav-item:hover{background:var(--surface-hover)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.nav-item .count{margin-left:auto;font-size:11px;color:var(--text-faint);font-family:var(--font-mono)}
+.nav-item.active .count{color:var(--accent)}
+.sidebar .foot{margin-top:auto;padding:10px 11px;font-size:11px;color:var(--text-faint);line-height:1.5}
+
+/* ---- stage (center) ---- */
+.stage{flex:1;position:relative;min-width:0;display:flex;flex-direction:column}
+
+/* canvas */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;
+  background-color:var(--slate-50);
+  background-image:radial-gradient(var(--slate-200) 1px, transparent 1px);
+  background-size:22px 22px;
+}
+.canvas-hint{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;
+  font-size:12px;color:var(--text-faint);
+  display:flex;align-items:center;gap:7px;pointer-events:none;
+}
+.canvas-hint kbd{font-family:var(--font-mono);font-size:10.5px;background:var(--white);
+  border:1px solid var(--border-subtle);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--text-muted)}
+.canvas{position:absolute;inset:0;transform-origin:0 0;cursor:default}
+.canvas.panning{cursor:grabbing}
+
+/* workbox */
+.workbox{
+  position:absolute;
+  background:var(--white);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-xs);
+  overflow:hidden;
+  cursor:pointer;
+  transition:box-shadow var(--ease-standard) 180ms,border-color 180ms,transform 180ms;
+}
+.workbox:hover{box-shadow:var(--shadow-md);border-color:var(--border-strong);transform:translateY(-1px)}
+.workbox.supervised{border-color:var(--indigo-200);box-shadow:0 0 0 3px var(--indigo-50),var(--shadow-sm)}
+.workbox.drifting{border-color:var(--amber-600)}
+.wb-head{display:flex;align-items:center;gap:8px;padding:12px 14px 0}
+.wb-title{font-weight:700;color:var(--text-strong);font-size:14px;letter-spacing:-.01em}
+.wb-sub{padding:1px 14px 0;font-size:11.5px;color:var(--text-muted)}
+.wb-field{position:absolute;inset:0;top:0}/* agent roaming area */
+.wb-foot{position:absolute;left:14px;right:14px;bottom:11px;display:flex;align-items:center;gap:8px}
+.wb-expand{position:absolute;top:11px;right:11px;width:22px;height:22px;border-radius:6px;
+  display:grid;place-items:center;color:var(--text-faint);opacity:0;transition:opacity 160ms}
+.workbox:hover .wb-expand{opacity:1}
+.wb-expand svg{width:14px;height:14px;stroke:currentColor}
+
+/* status badge (curricula fixed vocab) */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  letter-spacing:.02em;padding:2px 9px;border-radius:var(--radius-pill);line-height:1.5;white-space:nowrap}
+.badge .bd{width:6px;height:6px;border-radius:50%;background:currentColor}
+.badge.working{background:var(--indigo-50);color:var(--indigo-600)}
+.badge.holding{background:var(--slate-100);color:var(--slate-500)}
+.badge.idle{background:var(--slate-100);color:var(--slate-400)}
+.badge.drifting{background:var(--amber-50);color:var(--amber-700)}
+.badge.done{background:var(--green-50);color:var(--green-700)}
+.badge.queued{background:var(--indigo-50);color:var(--indigo-600)}
+
+/* ---- agent mascot (clean, quiet) ---- */
+.agent{
+  position:absolute;width:44px;height:44px;border-radius:50%;
+  background:var(--white);border:1.5px solid var(--slate-300);
+  box-shadow:var(--shadow-sm);
+  display:grid;place-items:center;
+  will-change:transform;
+  transition:border-color 240ms var(--ease-standard);
+}
+.agent.working{border-color:var(--indigo-200)}
+.agent.drifting{border-color:var(--amber-600)}
+.agent.idle{border-color:var(--slate-200)}
+.agent .eyes{display:flex;gap:6px;align-items:center}
+.agent .eyes i{width:4px;height:8px;border-radius:3px;background:var(--slate-700);
+  transform-origin:center;animation:blink 5.5s infinite}
+.agent .eyes i:nth-child(2){animation-delay:.15s}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.15)}}
+
+/* otto — the supervisor */
+.otto{
+  position:absolute;width:56px;height:56px;border-radius:50%;
+  background:var(--white);border:2px solid var(--indigo-600);
+  box-shadow:0 0 0 4px var(--indigo-50),var(--shadow-md);
+  display:grid;place-items:center;z-index:20;will-change:transform;
+}
+.otto.alert{border-color:var(--amber-600);box-shadow:0 0 0 4px var(--amber-50),var(--shadow-md)}
+.otto .eyes{display:flex;gap:8px}
+.otto .eyes i{width:5px;height:11px;border-radius:3px;background:var(--slate-800);animation:blink 6s infinite}
+.otto.alert .eyes i{height:7px}
+.otto-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+  font-size:10px;font-weight:700;color:var(--indigo-600);background:var(--white);
+  border:1px solid var(--indigo-100);border-radius:var(--radius-pill);padding:1px 8px;white-space:nowrap}
+.otto.alert .otto-tag{color:var(--amber-700);border-color:var(--amber-600)}
+
+/* otto sight line to supervised box */
+.sightline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10;overflow:visible}
+.sightline path{stroke:var(--indigo-300,#a5b4fc);stroke-width:1.5;stroke-dasharray:4 5;fill:none;
+  opacity:.0;transition:opacity 300ms;animation:dash 18s linear infinite}
+.sightline path.on{opacity:.7}
+@keyframes dash{to{stroke-dashoffset:-200}}
+
+/* command bar */
+.cmdbar{
+  position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;
+  width:min(620px,calc(100% - 48px));
+  display:flex;align-items:center;gap:8px;
+  background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-pill);
+  box-shadow:var(--shadow-lg);padding:7px 7px 7px 16px;
+}
+.cmdbar svg{width:16px;height:16px;stroke:var(--text-faint);flex:0 0 auto}
+.cmdbar input{flex:1;border:0;outline:0;background:transparent;font-family:inherit;font-size:14px;color:var(--text-strong)}
+.cmdbar input::placeholder{color:var(--text-faint)}
+.cmdbar button{
+  border:0;background:var(--accent);color:#fff;font-weight:600;font-size:13px;
+  padding:8px 16px;border-radius:var(--radius-pill);cursor:pointer;transition:background 140ms;
+}
+.cmdbar button:hover{background:var(--accent-hover)}
+.cmdbar button:active{transform:translateY(.5px)}
+
+/* ---- context panel (right) ---- */
+.context{
+  width:var(--context-width);flex:0 0 auto;
+  background:var(--white);border-left:1px solid var(--border-subtle);
+  display:flex;flex-direction:column;min-height:0;
+}
+.ctx-head{padding:16px 18px 12px;border-bottom:1px solid var(--border-subtle)}
+.ctx-head h2{margin:0;font-size:15px;font-weight:700;color:var(--text-strong);letter-spacing:-.01em}
+.ctx-now{margin-top:8px;display:flex;align-items:flex-start;gap:9px;
+  background:var(--slate-50);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:10px 11px}
+.ctx-now .spin{width:14px;height:14px;flex:0 0 auto;margin-top:2px;border:2px solid var(--indigo-200);
+  border-top-color:var(--indigo-600);border-radius:50%;animation:spin 1s linear infinite}
+.ctx-now.alert .spin{border-color:var(--amber-50);border-top-color:var(--amber-600)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ctx-now .t{font-size:12.5px;color:var(--text-body);line-height:1.4}
+.ctx-now .t b{color:var(--text-strong);font-weight:600}
+.ctx-body{flex:1;overflow-y:auto;padding:6px 0 18px}
+.ctx-sec{padding:14px 18px 4px}
+.ctx-sec .sh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ctx-sec .sh .eyebrow{flex:1}
+.ctx-sec .sh .n{font-size:11px;color:var(--text-faint);font-family:var(--font-mono)}
+
+.prio{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--slate-100)}
+.prio:last-child{border-bottom:0}
+.prio .rk{width:18px;height:18px;border-radius:5px;background:var(--slate-100);color:var(--text-muted);
+  font-size:10px;font-weight:700;display:grid;place-items:center;flex:0 0 auto;font-family:var(--font-mono)}
+.prio.hot .rk{background:var(--indigo-600);color:#fff}
+.prio .pt{flex:1;min-width:0}
+.prio .pt .l{font-size:13px;color:var(--text-strong);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prio .pt .m{font-size:11px;color:var(--text-muted);margin-top:1px}
+
+/* escalation queue items in context */
+.qcard{border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:11px 12px;margin-bottom:10px;background:var(--white);box-shadow:var(--shadow-xs)}
+.qcard .qt{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.qcard .qw{margin-left:auto;font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.qcard .ql{font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.35}
+.qcard .qr{font-size:11.5px;color:var(--text-muted);line-height:1.45;margin-top:6px;
+  padding-left:9px;border-left:2px solid var(--slate-200)}
+.qcard .qmeta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qcard .qmeta span{font-size:10.5px;color:var(--text-muted);background:var(--slate-50);
+  border:1px solid var(--border-subtle);border-radius:5px;padding:2px 6px;font-family:var(--font-mono)}
+.q-empty{color:var(--text-faint);font-size:12.5px;padding:16px 0;text-align:center;line-height:1.5}
+
+/* ============================================================
+   NODE VIEW (click a workbox)
+   ============================================================ */
+.nodeview{position:absolute;inset:0;z-index:40;background:var(--slate-50);
+  background-image:radial-gradient(var(--slate-200) 1px,transparent 1px);background-size:22px 22px;
+  display:none;flex-direction:column}
+.nodeview.open{display:flex}
+.nv-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--white);border-bottom:1px solid var(--border-subtle)}
+.nv-back{display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--border-subtle);
+  border-radius:var(--radius-md);background:var(--white);color:var(--text-body);font-size:13px;font-weight:600;cursor:pointer}
+.nv-back:hover{background:var(--surface-hover)}
+.nv-back svg{width:15px;height:15px;stroke:currentColor}
+.nv-title{font-weight:700;color:var(--text-strong);font-size:15px}
+.nv-sub{font-size:12px;color:var(--text-muted)}
+.nv-canvas{flex:1;position:relative;overflow:hidden}
+.nv-inner{position:absolute;inset:0}
+.edges{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.edges path{fill:none;stroke:var(--slate-300);stroke-width:2}
+.edges path.live{stroke:var(--indigo-500);stroke-dasharray:5 6;animation:dash 14s linear infinite}
+.gnode{position:absolute;min-width:150px;max-width:190px;background:var(--white);
+  border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);
+  padding:11px 13px;transition:border-color 200ms,box-shadow 200ms}
+.gnode .gn-eyebrow{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);font-weight:600}
+.gnode .gn-title{font-size:13px;font-weight:600;color:var(--text-strong);margin-top:3px;line-height:1.3}
+.gnode .gn-meta{font-size:11px;color:var(--text-muted);margin-top:5px;font-family:var(--font-mono)}
+.gnode.done{border-color:var(--green-100)}
+.gnode.done .gn-eyebrow{color:var(--green-700)}
+.gnode.active{border:1.5px solid var(--indigo-600);box-shadow:0 0 0 4px var(--indigo-50),var(--shadow-sm)}
+.gnode.active .gn-eyebrow{color:var(--indigo-600)}
+.gnode .tick{position:absolute;top:10px;right:11px;width:15px;height:15px}
+.nv-status{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:9px;background:var(--white);border:1px solid var(--border-subtle);
+  border-radius:var(--radius-pill);box-shadow:var(--shadow-md);padding:8px 16px;font-size:13px;color:var(--text-body)}
+.nv-status .spin{width:13px;height:13px;border:2px solid var(--indigo-200);border-top-color:var(--indigo-600);border-radius:50%;animation:spin 1s linear infinite}
+.nv-status .mono{color:var(--text-muted);font-size:12px}
+
+/* ============================================================
+   MEMORY + LOGS VIEWS (sidebar nav)
+   ============================================================ */
+.panelview{position:absolute;inset:0;z-index:35;background:var(--surface-page);display:none;flex-direction:column}
+.panelview.open{display:flex}
+.pv-top{padding:18px 24px 8px}
+.pv-top h1{margin:0;font-size:20px;font-weight:700;color:var(--text-strong);letter-spacing:-.01em}
+.pv-top p{margin:4px 0 0;font-size:13px;color:var(--text-muted)}
+.pv-body{flex:1;overflow-y:auto;padding:14px 24px 28px}
+.mem-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media(max-width:1100px){.mem-cols{grid-template-columns:1fr}}
+.mem-panel{background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs)}
+.mem-panel .mp-head{padding:14px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px}
+.mem-panel .mp-head .ti{font-weight:700;color:var(--text-strong);font-size:14px}
+.mem-panel .mp-head .sub{font-size:12px;color:var(--text-muted)}
+.mem-panel .mp-head .n{margin-left:auto;font-size:11px;color:var(--text-faint);font-family:var(--font-mono)}
+.mp-body{padding:6px 16px 14px}
+
+/* short-term row */
+.st-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--slate-100)}
+.st-row:last-child{border-bottom:0}
+.st-row .age{width:42px;flex:0 0 auto;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--text-muted)}
+.st-row .stm{flex:1;min-width:0}
+.st-row .stm .l{font-size:13.5px;color:var(--text-strong)}
+.st-row .stm .meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+.st-row .stm .who{font-size:11px;color:var(--text-muted);font-weight:500}
+.st-row .stm .cat{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);
+  border:1px solid var(--border-subtle);border-radius:4px;padding:1px 6px}
+.st-row .hold{width:96px;flex:0 0 auto}
+.st-row .hold .bar{height:5px;border-radius:3px;background:var(--slate-100);overflow:hidden}
+.st-row .hold .bar i{display:block;height:100%;background:var(--indigo-500);border-radius:3px;transition:width .5s}
+.st-row .hold .bl{font-size:10px;color:var(--text-faint);margin-top:3px;text-align:right}
+
+/* long-term card */
+.lt-card{border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:13px 14px;margin-bottom:10px;background:var(--white)}
+.lt-card .p{font-size:13.5px;color:var(--text-body);line-height:1.45}
+.lt-card .p b{color:var(--text-strong);font-weight:600}
+.lt-card .cf{display:flex;align-items:center;gap:10px;margin-top:9px}
+.lt-card .cf .bar{flex:1;height:5px;border-radius:3px;background:var(--slate-100);overflow:hidden}
+.lt-card .cf .bar i{display:block;height:100%;background:var(--indigo-600);border-radius:3px}
+.lt-card .cf .v{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.lt-card .seen{font-size:11px;color:var(--text-faint);margin-top:6px}
+
+/* logs (shift ledger) */
+.log-row{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--slate-100)}
+.log-row:last-child{border-bottom:0}
+.log-row .lt{width:52px;flex:0 0 auto;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);padding-top:2px}
+.log-row .lc{flex:1;min-width:0}
+.log-row .lc .ltop{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.log-badge{font-size:10px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;padding:2px 7px;border-radius:5px}
+.log-badge.ingestion{background:var(--slate-100);color:var(--slate-600)}
+.log-badge.aging{background:var(--amber-50);color:var(--amber-700)}
+.log-badge.pattern{background:var(--indigo-50);color:var(--indigo-600)}
+.log-badge.escalation{background:var(--indigo-50);color:var(--indigo-700)}
+.log-badge.otto{background:var(--green-50);color:var(--green-700)}
+.log-row .lc .ld{font-size:13.5px;color:var(--text-body);line-height:1.45}
+.log-row .lc .ld b{color:var(--text-strong);font-weight:600}
+.log-row .lc .lref{margin-top:6px;font-size:11px;color:var(--text-muted)}
+.log-row .lc .lref code{font-family:var(--font-mono);color:var(--indigo-600);background:var(--indigo-50);padding:1px 5px;border-radius:4px}
+.logwrap{background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:4px 18px;max-width:880px}
+
+.settings-card{background:var(--white);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs);padding:20px 22px;max-width:560px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--slate-100)}
+.settings-row:last-child{border-bottom:0}
+.settings-row .sl{font-size:14px;color:var(--text-strong);font-weight:500}
+.settings-row .sd{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+/* ---- responsive: keep the canvas alive on narrow screens ---- */
+@media(max-width:1180px){
+  :root{--context-width:288px}
+}
+@media(max-width:1040px){
+  .context{position:absolute;right:0;top:0;bottom:0;z-index:45;box-shadow:var(--shadow-lg);
+    transform:translateX(100%);transition:transform var(--ease-standard) 220ms}
+  .context.show{transform:none}
+  .ctx-toggle{display:flex}
+}
+@media(max-width:760px){
+  :root{--sidebar-width:64px}
+  .sidebar .wp-btn span:not(.sq),.nav-item:not(.active) .count,.nav .nh,.sidebar .foot,.nav-item span:last-child{display:none}
+  .wp-btn{justify-content:center}
+  .nav-item{justify-content:center}
+}
+.ctx-toggle{display:none;position:absolute;right:14px;bottom:78px;z-index:44;
+  align-items:center;gap:7px;padding:9px 14px;border-radius:var(--radius-pill);
+  background:var(--white);border:1px solid var(--border-subtle);box-shadow:var(--shadow-md);
+  font-size:13px;font-weight:600;color:var(--text-body);cursor:pointer}
+.ctx-toggle svg{width:15px;height:15px;stroke:currentColor}
+.switch{width:38px;height:22px;border-radius:var(--radius-pill);background:var(--slate-300);position:relative;cursor:pointer;transition:background 180ms}
+.switch.on{background:var(--indigo-600)}
+.switch i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:left 180ms var(--ease-out)}
+.switch.on i{left:18px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <div class="mark">
+      <svg width="26" height="26" viewBox="0 0 40 40" fill="none"><rect x="3" y="3" width="34" height="34" rx="10" fill="#0f172a"/><rect x="11" y="12" width="18" height="3.6" rx="1.8" fill="#fff"/><rect x="11" y="18.2" width="18" height="3.6" rx="1.8" fill="#4f46e5"/><rect x="11" y="24.4" width="11" height="3.6" rx="1.8" fill="#64748b"/></svg>
+      <span class="wm">Otto's Abode <span class="dim">/ mission control</span></span>
+    </div>
+    <div class="crumb" id="crumb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      <span id="crumbView">Workplace</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="otto-state" id="ottoState"><span class="dot"></span><span id="ottoStateTxt">Otto · supervising</span></div>
+  </header>
+
+  <div class="body">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+      <button class="wp-btn" data-view="workplace"><span class="sq"><i></i></span>Workplace</button>
+      <nav class="nav">
+        <div class="nh">Otto</div>
+        <div class="nav-item" data-view="memory">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.142 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.142 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>
+          Memory <span class="count" id="memCount">—</span>
+        </div>
+        <div class="nav-item" data-view="logs">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7h3M8 12h3M8 17h3"/></svg>
+          Logs <span class="count" id="logCount">—</span>
+        </div>
+        <div class="nav-item" data-view="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          Settings
+        </div>
+      </nav>
+      <div class="foot">Otto acts only within its constraints — it holds, decides, and queues. Delivery happens elsewhere.</div>
+    </aside>
+
+    <!-- ===== STAGE ===== -->
+    <main class="stage">
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="canvas-hint"><span>Drag the canvas to move it</span><kbd>Space</kbd><span>or middle-drag</span></div>
+        <div class="canvas" id="canvas">
+          <svg class="sightline" id="sightline"><path id="sightPath" d=""/></svg>
+          <!-- workboxes + otto injected here -->
+        </div>
+        <div class="cmdbar">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg>
+          <input id="cmdInput" placeholder="Give Otto a commitment to hold — e.g. “told Maya I'd lock the design system Friday”" />
+          <button id="cmdSend">Hand to Otto</button>
+        </div>
+
+        <button class="ctx-toggle" id="ctxToggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>Context</button>
+
+        <!-- node view overlay -->
+        <div class="nodeview" id="nodeview">
+          <div class="nv-top">
+            <button class="nv-back" id="nvBack"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7M19 12H5"/></svg>Workplace</button>
+            <div>
+              <div class="nv-title" id="nvTitle">—</div>
+              <div class="nv-sub" id="nvSub">—</div>
+            </div>
+            <div style="margin-left:auto" id="nvBadge"></div>
+          </div>
+          <div class="nv-canvas">
+            <div class="nv-inner" id="nvInner">
+              <svg class="edges" id="nvEdges"></svg>
+              <!-- nodes injected -->
+            </div>
+            <div class="nv-status"><span class="spin"></span><span id="nvStatus">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- panel views (memory / logs / settings) -->
+      <div class="panelview" id="panelview">
+        <div class="pv-top"><h1 id="pvTitle">—</h1><p id="pvSub">—</p></div>
+        <div class="pv-body" id="pvBody"></div>
+      </div>
+    </main>
+
+    <!-- ===== CONTEXT PANEL ===== -->
+    <aside class="context" id="contextPanel">
+      <div class="ctx-head">
+        <h2>Context</h2>
+        <div class="ctx-now" id="ctxNow">
+          <span class="spin"></span>
+          <span class="t" id="ctxNowTxt">Otto is settling in…</span>
+        </div>
+      </div>
+      <div class="ctx-body">
+        <div class="ctx-sec">
+          <div class="sh"><span class="eyebrow">Priorities</span><span class="n" id="prioN"></span></div>
+          <div id="prioList"></div>
+        </div>
+        <div class="ctx-sec">
+          <div class="sh"><span class="eyebrow">Escalation queue</span><span class="n" id="qN"></span></div>
+          <div style="font-size:11px;color:var(--text-faint);margin:-4px 0 10px">The handoff boundary — decided &amp; held, awaiting the moment.</div>
+          <div id="ctxQueue"></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA MODEL
+   ============================================================ */
+const AGENTS = [
+  {key:'ingestion', name:'Ingestion', sub:'Parses new commitment signals',
+   box:{x:48,y:46,w:236,h:182}, status:'working',
+   nodes:[
+     {id:'recv',  eyebrow:'Input',   t:'Receive raw signal', meta:'manual / inbox'},
+     {id:'parse', eyebrow:'Process', t:'Extract who · category · deadline', meta:'NLU pass'},
+     {id:'tag',   eyebrow:'Process', t:'Tag relationship weight', meta:'high / med / low'},
+     {id:'write', eyebrow:'Output',  t:'Write to short-term buffer', meta:'age = 0h'},
+     {id:'hand',  eyebrow:'Handoff', t:'Hand reference to Aging', meta:'ST::ref'},
+   ],
+   edges:[['recv','parse'],['parse','tag'],['tag','write'],['write','hand']],
+   layout:{recv:[60,150],parse:[300,60],tag:[300,250],write:[560,150],hand:[820,150]},
+   statusLines:['Receiving a new commitment signal…','Extracting who, category and deadline…','Tagging relationship weight…','Writing to the short-term buffer…']},
+
+  {key:'aging', name:'Aging', sub:'Tracks hold-time & decay by relationship cost',
+   box:{x:318,y:34,w:250,h:206}, status:'holding',
+   nodes:[
+     {id:'read', eyebrow:'Input',   t:'Read each held commitment', meta:'per tick'},
+     {id:'age',  eyebrow:'Process', t:'age += elapsed', meta:'rolling'},
+     {id:'decay',eyebrow:'Process', t:'Recompute decay', meta:'f(age, cost)'},
+     {id:'thr',  eyebrow:'Decision',t:'age > threshold(category)?', meta:'branch'},
+     {id:'mark', eyebrow:'Output',  t:'Mark threshold approaching', meta:'→ Pattern'},
+     {id:'hold', eyebrow:'Output',  t:'Keep holding', meta:'may expire'},
+   ],
+   edges:[['read','age'],['age','decay'],['decay','thr'],['thr','mark'],['thr','hold']],
+   layout:{read:[50,150],age:[280,150],decay:[510,150],thr:[740,60],mark:[740,250],hold:[510,300]},
+   statusLines:['Reading held commitments…','Ageing each held item…','Recomputing decay by relationship cost…','Checking hold thresholds…']},
+
+  {key:'pattern', name:'Pattern', sub:'Reads long-term memory, surfaces behaviour',
+   box:{x:602,y:46,w:244,h:166}, status:'idle',
+   nodes:[
+     {id:'lt',   eyebrow:'Input',   t:'Read long-term model', meta:'person + category'},
+     {id:'xref', eyebrow:'Process', t:'Cross-reference held signal', meta:'similarity'},
+     {id:'conf', eyebrow:'Decision',t:'Match confidence ≥ 0.80?', meta:'branch'},
+     {id:'verdict',eyebrow:'Output',t:'Return verdict', meta:'→ Aging / Escalation'},
+     {id:'upd',  eyebrow:'Output',  t:'Strengthen long-term node', meta:'if recurring'},
+   ],
+   edges:[['lt','xref'],['xref','conf'],['conf','verdict'],['conf','upd']],
+   layout:{lt:[60,150],xref:[300,150],conf:[540,60],verdict:[790,150],upd:[540,290]},
+   statusLines:['Reading the long-term model…','Cross-referencing against learned patterns…','Scoring match confidence…','Updating the model…']},
+
+  {key:'escalation', name:'Escalation', sub:'Decides when aging crosses into resurfacing',
+   box:{x:602,y:236,w:244,h:178}, status:'working',
+   nodes:[
+     {id:'mon', eyebrow:'Input',   t:'Monitor escalation-ready items', meta:'watch'},
+     {id:'win', eyebrow:'Process', t:'Fetch optimal resurfacing window', meta:'from model'},
+     {id:'gate',eyebrow:'Decision',t:'High cost AND drop-rate confirmed?', meta:'branch'},
+     {id:'queue',eyebrow:'Output', t:'Place on escalation queue', meta:'ranked'},
+     {id:'wait',eyebrow:'Output',  t:'Hold · re-evaluate next tick', meta:'never early'},
+   ],
+   edges:[['mon','win'],['win','gate'],['gate','queue'],['gate','wait']],
+   layout:{mon:[60,150],win:[300,150],gate:[540,60],queue:[790,60],wait:[540,290]},
+   statusLines:['Monitoring escalation-ready items…','Fetching the resurfacing window…','Evaluating cost and drop-rate…','Queuing for the right window…']},
+];
+
+let shortTerm = [
+  {id:'s0', txt:'Maya: lock the design system by Friday', who:'Maya', cat:'Design', age:30, weight:.9},
+  {id:'s1', txt:'Promised R. Khanna a mentorship check-in', who:'R. Khanna', cat:'Mentorship', age:48, weight:.85},
+  {id:'s2', txt:'Owe Devs feedback on the auth PR', who:'Devs', cat:'Review', age:12, weight:.5},
+  {id:'s3', txt:'Said I’d reflect on Q3 priorities', who:'self', cat:'Reflection', age:6, weight:.4},
+];
+let longTerm = [
+  {p:'<b>Maya</b> drops design commitments after <b>day 4</b> — nudge before Thursday', conf:.92, seen:'17 instances'},
+  {p:'<b>Mentorship</b> follow-ups carry <b>high relationship cost</b> if missed', conf:.88, seen:'9 instances'},
+  {p:'<b>Sunday evenings</b> are <b>high-reflection</b> windows — best for resurfacing', conf:.81, seen:'observed 6 weeks'},
+  {p:'<b>Review</b> asks decay fast but cost is <b>low</b> — safe to deprioritise', conf:.74, seen:'22 instances'},
+  {p:'<b>Intro</b> requests honoured within 48h <b>97%</b> of the time', conf:.79, seen:'11 instances'},
+  {p:'<b>Design</b> commitments past <b>day 5</b> rarely self-resolve', conf:.85, seen:'14 instances'},
+];
+let logs = [];
+let queue = [];
+let priorities = [];
+let sigSeq = 10;
+let ottoAlert = false;
+
+const CAT_THRESHOLD = {Design:42,Mentorship:36,Review:60,Reflection:66,Intro:48,Followup:54};
+const NEW_SIGNALS = [
+  {txt:'Priya: intro me to the design lead?', who:'Priya', cat:'Intro', weight:.6},
+  {txt:'Told Sam I’d review the onboarding flow', who:'Sam', cat:'Review', weight:.55},
+  {txt:'Committed to a design crit on Thursday', who:'Maya', cat:'Design', weight:.85},
+  {txt:'Aarav: still up for that mentorship call?', who:'Aarav', cat:'Mentorship', weight:.8},
+  {txt:'Said I’d send J. Lin the deck by EOW', who:'J. Lin', cat:'Followup', weight:.5},
+  {txt:'Agreed to co-design the new dashboard', who:'Devs', cat:'Design', weight:.88},
+];
+
+/* ============================================================
+   BUILD CANVAS — workboxes, agents, otto
+   ============================================================ */
+const canvas = document.getElementById('canvas');
+const agentEls = {};
+let otto = {x:120,y:330,tx:120,ty:330, el:null, target:null, action:'settling', hold:0};
+
+function computeLayout(){
+  const wrap=document.getElementById('canvasWrap');
+  const W=wrap.clientWidth||900, H=wrap.clientHeight||620;
+  const margin=34, gap=22, bottomBand=128;
+  const boxW=Math.max(190,Math.min(380,(W-2*margin-gap)/2));
+  const boxH=Math.max(150,Math.min(204,(H-2*margin-bottomBand-gap)/2));
+  const gridW=boxW*2+gap;
+  const offX=Math.max(margin,(W-gridW)/2);
+  const offY=margin+4;
+  const cells=[[0,0],[1,0],[0,1],[1,1]];
+  AGENTS.forEach((a,i)=>{
+    const [c,r]=cells[i];
+    a.box={x:Math.round(offX+c*(boxW+gap)), y:Math.round(offY+r*(boxH+gap)), w:Math.round(boxW), h:Math.round(boxH)};
+  });
+}
+function applyLayout(){
+  AGENTS.forEach(a=>{
+    const b=a.box;
+    a._box.style.left=b.x+'px'; a._box.style.top=b.y+'px';
+    a._box.style.width=b.w+'px'; a._box.style.height=b.h+'px';
+    const bn=agentBounds(a);
+    a._pos.x=Math.min(Math.max(a._pos.x,bn.minx),bn.maxx);
+    a._pos.y=Math.min(Math.max(a._pos.y,bn.miny),bn.maxy);
+    pickAgentTarget(a);
+  });
+  const wrap=document.getElementById('canvasWrap');
+  otto.x=Math.min(Math.max(otto.x,40),wrap.clientWidth-60);
+  otto.y=Math.min(Math.max(otto.y,60),wrap.clientHeight-92);
+}
+function buildCanvas(){
+  computeLayout();
+  AGENTS.forEach(a=>{
+    const b=a.box;
+    const box=document.createElement('div');
+    box.className='workbox';
+    box.dataset.key=a.key;
+    box.style.left=b.x+'px'; box.style.top=b.y+'px';
+    box.style.width=b.w+'px'; box.style.height=b.h+'px';
+    box.innerHTML=`
+      <div class="wb-head"><span class="wb-title">${a.name}</span></div>
+      <div class="wb-sub">${a.sub}</div>
+      <div class="wb-expand"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
+      <div class="wb-foot"><span class="badge ${a.status}" data-badge><span class="bd"></span>${statusLabel(a.status)}</span></div>`;
+    box.addEventListener('click',()=>openNode(a.key));
+    canvas.appendChild(box);
+
+    // agent token, roams inside box
+    const ag=document.createElement('div');
+    ag.className='agent '+a.status;
+    ag.innerHTML='<div class="eyes"><i></i><i></i></div>';
+    canvas.appendChild(ag);
+    a._pos={x:b.x+b.w/2, y:b.y+b.h/2+10};
+    a._t={x:b.x+b.w/2, y:b.y+b.h/2+10};
+    a._el=ag; a._box=box;
+    agentEls[a.key]=ag;
+  });
+
+  // otto
+  const o=document.createElement('div');
+  o.className='otto';
+  o.innerHTML='<span class="otto-tag">Otto</span><div class="eyes"><i></i><i></i></div>';
+  canvas.appendChild(o);
+  otto.el=o;
+}
+function statusLabel(s){return {working:'Working',holding:'Holding',idle:'Idle',drifting:'Drifting',done:'Done'}[s]||s}
+
+/* agent wandering bounds inside its box */
+function agentBounds(a){
+  const b=a.box, pad=26, top=58;
+  return {minx:b.x+pad, maxx:b.x+b.w-pad, miny:b.y+top, maxy:b.y+b.h-30};
+}
+function pickAgentTarget(a){
+  const bn=agentBounds(a);
+  a._t={x:bn.minx+Math.random()*(bn.maxx-bn.minx), y:bn.miny+Math.random()*(bn.maxy-bn.miny)};
+}
+
+/* ============================================================
+   MOVEMENT LOOP (rAF)
+   ============================================================ */
+function tweenTo(pos, target, speed){
+  const dx=target.x-pos.x, dy=target.y-pos.y;
+  const d=Math.hypot(dx,dy);
+  if(d<1.2) return d;
+  const step=Math.min(d, speed);
+  pos.x+=dx/d*step; pos.y+=dy/d*step;
+  return d;
+}
+let lastReach={};
+function frame(){
+  if(window.__ottoPause){ window.__ottoStopped=true; return; }
+  // agents wander within boxes
+  AGENTS.forEach(a=>{
+    const d=tweenTo(a._pos, a._t, a.status==='idle'?0.35:(a.status==='drifting'?1.1:0.7));
+    if(d<2){ if(!a._wait){a._wait=performance.now()+ (600+Math.random()*1400);}
+      if(performance.now()>a._wait){pickAgentTarget(a); a._wait=0;} }
+    a._el.style.transform=`translate(${a._pos.x-22}px,${a._pos.y-22}px)`;
+  });
+  // otto roams toward target box
+  if(otto.target){
+    const tb=otto.target.box;
+    const aim={x:tb.x+tb.w/2, y:tb.y+tb.h+44}; // stand just below/near the box
+    const d=tweenTo(otto, aim, 1.5);
+    if(d<6){ otto.hold = otto.hold||performance.now()+1700; }
+  }
+  otto.el.style.transform=`translate(${otto.x-28}px,${otto.y-28}px)`;
+  updateSight();
+  requestAnimationFrame(frame);
+}
+function updateSight(){
+  const path=document.getElementById('sightPath');
+  if(otto.target){
+    const tb=otto.target.box;
+    const ex=tb.x+tb.w/2, ey=tb.y+tb.h-12;
+    const mx=(otto.x+ex)/2, my=Math.min(otto.y,ey)-30;
+    path.setAttribute('d',`M ${otto.x} ${otto.y-6} Q ${mx} ${my} ${ex} ${ey}`);
+    path.classList.add('on');
+  } else { path.classList.remove('on'); }
+}
+
+/* ============================================================
+   OTTO SUPERVISION LOOP
+   ============================================================ */
+let superIdx=0;
+function ottoSupervise(){
+  // priority: any drifting agent
+  const drift=AGENTS.find(a=>a.status==='drifting');
+  let target, action;
+  if(drift){
+    target=drift; action='correcting';
+    setCtxNow(`Otto noticed <b>${drift.name}</b> drifting — moving in to correct it.`, true);
+    setOttoAlert(true);
+  } else {
+    target=AGENTS[superIdx%AGENTS.length]; superIdx++;
+    action='checking';
+    const verbs=['checking for drift in','verifying priorities with','reviewing the work of','holding steady over'];
+    setCtxNow(`Otto is ${verbs[superIdx%verbs.length]} <b>${target.name}</b>.`, false);
+    setOttoAlert(queue.length>0);
+  }
+  otto.target=target; otto.action=action; otto.hold=0;
+  setOttoStateTxt(action==='correcting'?'Otto · correcting drift':'Otto · supervising');
+
+  // on arrival, resolve
+  const arriveCheck=setInterval(()=>{
+    if(otto.hold && performance.now()>otto.hold){
+      clearInterval(arriveCheck);
+      if(action==='correcting' && target.status==='drifting'){
+        setAgentStatus(target.key,'working');
+        addLog('otto', `Corrected drift in <b>${target.name}</b> Worker — realigned it to the active commitment set.`, `OTTO::fix · ${target.key}`);
+      }
+      otto.target=null; otto.hold=0;
+    }
+  },200);
+  // safety timeout
+  setTimeout(()=>{clearInterval(arriveCheck); otto.target=null; otto.hold=0;}, 7000);
+}
+
+function setAgentStatus(key,status){
+  const a=AGENTS.find(x=>x.key===key); if(!a)return;
+  a.status=status;
+  a._el.className='agent '+status;
+  const badge=a._box.querySelector('[data-badge]');
+  badge.className='badge '+status; badge.innerHTML=`<span class="bd"></span>${statusLabel(status)}`;
+  a._box.classList.toggle('drifting', status==='drifting');
+}
+function maybeDrift(){
+  if(AGENTS.some(a=>a.status==='drifting')) return;
+  if(Math.random()<0.4){
+    const candidates=AGENTS.filter(a=>a.status!=='idle');
+    const a=candidates[Math.floor(Math.random()*candidates.length)];
+    setAgentStatus(a.key,'drifting');
+    addLog(a.key, `Started <b>drifting</b> from the active commitment set — flagged for Otto's review.`, `${a.key.toUpperCase()}::drift`);
+  }
+}
+
+/* ============================================================
+   CONTEXT PANEL
+   ============================================================ */
+function setCtxNow(html, alert){
+  document.getElementById('ctxNowTxt').innerHTML=html;
+  document.getElementById('ctxNow').classList.toggle('alert',!!alert);
+}
+function setOttoStateTxt(t){document.getElementById('ottoStateTxt').textContent=t;}
+function setOttoAlert(on){
+  ottoAlert=on;
+  otto.el.classList.toggle('alert',on);
+  const s=document.getElementById('ottoState');
+  s.classList.toggle('alert',on);
+}
+function renderPriorities(){
+  // derive from short-term, ranked by weight*age
+  priorities = shortTerm.map(s=>({...s, score:s.weight*(s.age/24)}))
+    .sort((a,b)=>b.score-a.score).slice(0,4);
+  const host=document.getElementById('prioList');
+  host.innerHTML=priorities.map((p,i)=>`
+    <div class="prio ${i===0?'hot':''}">
+      <span class="rk">${i+1}</span>
+      <div class="pt">
+        <div class="l">${p.who==='self'?'Reflect · ':''}${p.cat} — ${p.who==='self'?'self':p.who}</div>
+        <div class="m">held ${Math.round(p.age)}h · ${p.weight>=.8?'high':p.weight>=.55?'medium':'low'} cost</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('prioN').textContent=priorities.length+' tracked';
+}
+function renderQueue(){
+  const host=document.getElementById('ctxQueue');
+  if(queue.length===0){
+    host.innerHTML=`<div class="q-empty">Nothing queued.<br>Otto is holding steady — watching, not waiting.</div>`;
+  } else {
+    host.innerHTML=queue.map((q,i)=>`
+      <div class="qcard">
+        <div class="qt"><span class="badge queued"><span class="bd"></span>${q.cat}</span><span class="qw">${q.when}</span></div>
+        <div class="ql">${q.title}</div>
+        <div class="qr">${q.reason}</div>
+        <div class="qmeta"><span>${q.flagged}</span><span>${q.mem}</span><span>cost ${q.cost}</span></div>
+      </div>`).join('');
+  }
+  document.getElementById('qN').textContent=queue.length?queue.length+' ready':'clear';
+  document.getElementById('memCount').textContent=shortTerm.length+'+'+longTerm.length;
+  document.getElementById('logCount').textContent=logs.length;
+}
+
+/* ============================================================
+   LOGS
+   ============================================================ */
+function nowStamp(){const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function addLog(worker, decision, ref){
+  logs.unshift({time:nowStamp(), worker, decision, ref});
+  if(logs.length>60) logs.pop();
+  if(currentView==='logs') renderLogs();
+  document.getElementById('logCount').textContent=logs.length;
+}
+
+/* ============================================================
+   SIMULATION
+   ============================================================ */
+function ingest(text){
+  let pick;
+  if(text){ pick={txt:text, who:guessWho(text), cat:guessCat(text), weight:0.7}; }
+  else { pick=NEW_SIGNALS[Math.floor(Math.random()*NEW_SIGNALS.length)]; }
+  const s={id:'s'+(sigSeq++), txt:pick.txt, who:pick.who, cat:pick.cat, weight:pick.weight, age:0};
+  shortTerm.unshift(s);
+  if(shortTerm.length>7) shortTerm.pop();
+  setAgentStatus('ingestion','working');
+  addLog('ingestion', `Parsed a new <b>${s.cat}</b> commitment to <b>${s.who==='self'?'self':s.who}</b>. Tagged <b>${s.weight>=.8?'high':s.weight>=.55?'medium':'low'} cost</b>, written to the buffer at 0h.`, `ST::${s.id}`);
+  renderPriorities(); renderQueue();
+  if(currentView==='memory') renderMemory();
+}
+function guessWho(t){const m=t.match(/\b([A-Z][a-z]+|[A-Z]\.\s?[A-Z][a-z]+)\b/); return m?m[1]:'someone';}
+function guessCat(t){t=t.toLowerCase();
+  if(/design|crit|dashboard/.test(t))return'Design';
+  if(/mentor|check-in|call/.test(t))return'Mentorship';
+  if(/review|feedback|pr\b/.test(t))return'Review';
+  if(/reflect|think|priorit/.test(t))return'Reflection';
+  if(/intro/.test(t))return'Intro';
+  return'Followup';}
+
+function tick(){
+  // age buffer
+  shortTerm.forEach(s=>{
+    s.age+=6;
+    const thr=CAT_THRESHOLD[s.cat]||54;
+    if(!s.flagged && s.age>=thr && s.weight>=0.6){
+      s.flagged=true;
+      setAgentStatus('aging','working');
+      addLog('aging', `<b>${s.cat}</b> commitment (${s.who==='self'?'self':s.who}) crossed its hold threshold at <b>${Math.round(s.age)}h</b>. Decay elevated by relationship cost — marked threshold approaching.`, `ST::${s.id} → AGE::${thr}h`);
+      // pattern cross-reference
+      setTimeout(()=>{
+        setAgentStatus('pattern','working');
+        const li=longTerm.findIndex(p=>p.p.toLowerCase().includes(s.cat.toLowerCase())||p.p.includes(s.who));
+        const idx=li>=0?li:0; const p=longTerm[idx];
+        const confirmed=p.conf>=0.78;
+        addLog('pattern', confirmed
+          ? `Cross-referenced the long-term model — <b>pattern confirmed</b> at ${Math.round(p.conf*100)}%. ${p.p.replace(/<\/?b>/g,'')}.`
+          : `Checked the long-term model — no strong pattern; low drop-risk, continue holding.`,
+          `LT::node_${idx} · ${Math.round(p.conf*100)}%`);
+        if(confirmed && s.weight>=0.75){ setTimeout(()=>enqueue(s,idx,p),700); }
+        else setTimeout(()=>setAgentStatus('pattern','idle'),1500);
+      },700);
+    }
+    if(s.age>=72 && !s.flagged){
+      s.expired=true;
+      addLog('aging', `<b>${s.cat}</b> signal (${s.who==='self'?'self':s.who}) aged past 72h at low cost — <b>expired silently</b> from the buffer.`, `ST::${s.id} · evicted`);
+    }
+  });
+  shortTerm=shortTerm.filter(s=>!s.expired);
+  renderPriorities(); renderQueue();
+  if(currentView==='memory') renderMemory();
+}
+
+function enqueue(s, idx, p){
+  if(queue.find(q=>q.sid===s.id)) return;
+  setAgentStatus('escalation','working');
+  const window = p.p.includes('Sunday') ? 'Sun eve · 19:30' : ['Tonight · 18:00','Tomorrow · 09:00','Thu · 11:00'][Math.floor(Math.random()*3)];
+  const cost = (s.cat==='Mentorship'||s.cat==='Design')?'high':s.weight>=.8?'med-high':'medium';
+  queue.unshift({
+    sid:s.id, cat:s.cat,
+    title:'Resurface: '+s.txt.replace(/^[^:]+:\s*/,''),
+    when:window,
+    reason:`Aging flagged Day ${Math.round(s.age/24)}. Pattern confirmed a high drop-rate at ${Math.round(p.conf*100)}%. Escalation chose the ${window.split('·')[0].trim()} window.`,
+    flagged:'Aging → Pattern → Escalation', mem:`LT::node_${idx}`, cost
+  });
+  const rank={'high':3,'med-high':2,'medium':1};
+  queue.sort((a,b)=>(rank[b.cost]||0)-(rank[a.cost]||0));
+  if(queue.length>5) queue.pop();
+  addLog('escalation', `Queued <b>${s.cat}</b> resurfacing for <b>${window}</b>. Decision made and held — Otto defers delivery to the right window, never interrupts early.`, `Q::${s.id}`);
+  renderQueue();
+  setOttoAlert(true);
+  setTimeout(()=>{ setAgentStatus('escalation','working'); setAgentStatus('aging','holding'); }, 3000);
+  setTimeout(()=>{ if(queue.length===0) setOttoAlert(false); }, 6000);
+}
+
+/* ============================================================
+   NODE VIEW
+   ============================================================ */
+let nodeAnim=null;
+function openNode(key){
+  const a=AGENTS.find(x=>x.key===key);
+  document.getElementById('crumbView').textContent=a.name+' · workflow';
+  document.getElementById('nvTitle').textContent=a.name+' Worker';
+  document.getElementById('nvSub').textContent=a.sub;
+  document.getElementById('nvBadge').innerHTML=`<span class="badge ${a.status}"><span class="bd"></span>${statusLabel(a.status)}</span>`;
+  const inner=document.getElementById('nvInner');
+  // clear old nodes
+  inner.querySelectorAll('.gnode').forEach(n=>n.remove());
+  const edges=document.getElementById('nvEdges');
+  // place nodes
+  a.nodes.forEach(n=>{
+    const pos=a.layout[n.id];
+    const el=document.createElement('div');
+    el.className='gnode'; el.dataset.id=n.id;
+    el.style.left=pos[0]+'px'; el.style.top=pos[1]+'px';
+    el.innerHTML=`<div class="gn-eyebrow">${n.eyebrow}</div><div class="gn-title">${n.t}</div><div class="gn-meta">${n.meta}</div>`;
+    inner.appendChild(el);
+  });
+  // draw edges (curved)
+  const getCenter=(id)=>{const p=a.layout[id];return {x:p[0]+85,y:p[1]+34}};
+  edges.innerHTML=a.edges.map(([f,t])=>{
+    const c1=getCenter(f), c2=getCenter(t);
+    const mx=(c1.x+c2.x)/2;
+    return `<path data-edge="${f}-${t}" d="M ${c1.x} ${c1.y} C ${mx} ${c1.y}, ${mx} ${c2.y}, ${c2.x} ${c2.y}"/>`;
+  }).join('');
+
+  document.getElementById('nodeview').classList.add('open');
+  if(currentView==='workplace') document.getElementById('contextPanel').style.display='none';
+  // animate progress through nodes
+  let i=0;
+  const order=a.nodes.map(n=>n.id);
+  const step=()=>{
+    inner.querySelectorAll('.gnode').forEach(el=>{
+      const id=el.dataset.id; const oi=order.indexOf(id);
+      el.classList.toggle('active', oi===i);
+      el.classList.toggle('done', oi<i);
+      el.querySelector('.tick')?.remove();
+      if(oi<i){ el.insertAdjacentHTML('beforeend',`<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`); }
+    });
+    // live edge
+    edges.querySelectorAll('path').forEach(p=>p.classList.remove('live'));
+    const curId=order[i], nextId=order[Math.min(i+1,order.length-1)];
+    const le=edges.querySelector(`[data-edge="${curId}-${nextId}"]`); if(le) le.classList.add('live');
+    document.getElementById('nvStatus').innerHTML = a.statusLines[Math.min(i,a.statusLines.length-1)];
+    i=(i+1)%order.length;
+  };
+  step();
+  clearInterval(nodeAnim);
+  nodeAnim=setInterval(step, 1700);
+}
+function closeNode(){
+  document.getElementById('nodeview').classList.remove('open');
+  document.getElementById('crumbView').textContent='Workplace';
+  if(currentView==='workplace') document.getElementById('contextPanel').style.display='';
+  clearInterval(nodeAnim);
+}
+document.getElementById('nvBack').addEventListener('click',closeNode);
+document.getElementById('ctxToggle').addEventListener('click',()=>document.getElementById('contextPanel').classList.toggle('show'));
+
+/* ============================================================
+   VIEW SWITCHING (sidebar)
+   ============================================================ */
+let currentView='workplace';
+function setView(v){
+  currentView=v;
+  closeNode();
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
+  const pv=document.getElementById('panelview');
+  const ctx=document.getElementById('contextPanel');
+  if(v==='workplace'){
+    pv.classList.remove('open'); ctx.style.display='';
+    document.getElementById('crumbView').textContent='Workplace';
+    return;
+  }
+  ctx.style.display='none';
+  pv.classList.add('open');
+  document.getElementById('crumbView').textContent=v.charAt(0).toUpperCase()+v.slice(1);
+  if(v==='memory'){ document.getElementById('pvTitle').textContent='Memory Core';
+    document.getElementById('pvSub').textContent='Two timescales — what Otto is holding, and what Otto has learned.';
+    renderMemory(); }
+  if(v==='logs'){ document.getElementById('pvTitle').textContent='Shift Ledger';
+    document.getElementById('pvSub').textContent='Otto’s autonomous decisions — who flagged it, what Otto decided, which memory it drew from.';
+    renderLogs(); }
+  if(v==='settings'){ document.getElementById('pvTitle').textContent='Settings';
+    document.getElementById('pvSub').textContent='Constraints that shape how Otto holds, decides, and queues.';
+    renderSettings(); }
+}
+document.querySelector('.wp-btn').addEventListener('click',()=>setView('workplace'));
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>setView(n.dataset.view)));
+
+function renderMemory(){
+  const stRows=shortTerm.map(s=>{
+    const pct=Math.min(s.age/72*100,100);
+    return `<div class="st-row">
+      <div class="age">${Math.round(s.age)}h</div>
+      <div class="stm"><div class="l">${s.txt}</div>
+        <div class="meta"><span class="who">${s.who==='self'?'↺ self':'@'+s.who}</span><span class="cat">${s.cat}</span></div></div>
+      <div class="hold"><div class="bar"><i style="width:${pct}%"></i></div><div class="bl">${s.age>=54?'promotable':s.age>=43?'aging':'holding'}</div></div>
+    </div>`;}).join('');
+  const ltCards=longTerm.map(p=>`
+    <div class="lt-card"><div class="p">${p.p}</div>
+      <div class="cf"><div class="bar"><i style="width:${Math.round(p.conf*100)}%"></i></div><span class="v">${Math.round(p.conf*100)}%</span></div>
+      <div class="seen">${p.seen}</div></div>`).join('');
+  document.getElementById('pvBody').innerHTML=`
+    <div class="mem-cols">
+      <div class="mem-panel">
+        <div class="mp-head"><div><div class="ti">Short-term</div><div class="sub">Rolling buffer · last 48–72h · held &amp; evaluated</div></div><span class="n">${shortTerm.length} held</span></div>
+        <div class="mp-body">${stRows||'<div class="q-empty">Buffer empty.</div>'}</div>
+      </div>
+      <div class="mem-panel">
+        <div class="mp-head"><div><div class="ti">Long-term</div><div class="sub">Crystallised model · learned behaviour, not a log</div></div><span class="n">${longTerm.length} patterns</span></div>
+        <div class="mp-body">${ltCards}</div>
+      </div>
+    </div>`;
+}
+function renderLogs(){
+  const rows=logs.map(l=>`
+    <div class="log-row">
+      <div class="lt">${l.time}</div>
+      <div class="lc">
+        <div class="ltop"><span class="log-badge ${l.worker}">${l.worker} ${l.worker==='otto'?'':'worker'}</span></div>
+        <div class="ld">${l.decision}</div>
+        <div class="lref">⌖ memory <code>${l.ref}</code></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('pvBody').innerHTML=`<div class="logwrap">${rows||'<div class="q-empty">No decisions logged yet.</div>'}</div>`;
+}
+function renderSettings(){
+  document.getElementById('pvBody').innerHTML=`
+    <div class="settings-card">
+      <div class="settings-row"><div><div class="sl">Hold window</div><div class="sd">How long the short-term buffer holds a signal before it expires.</div></div><span class="mono" style="color:var(--text-muted)">72 h</span></div>
+      <div class="settings-row"><div><div class="sl">Resurface only in learned windows</div><div class="sd">Otto waits for high-reflection windows rather than interrupting.</div></div><div class="switch on" onclick="this.classList.toggle('on')"><i></i></div></div>
+      <div class="settings-row"><div><div class="sl">Auto-correct agent drift</div><div class="sd">Otto realigns a drifting worker without asking.</div></div><div class="switch on" onclick="this.classList.toggle('on')"><i></i></div></div>
+      <div class="settings-row"><div><div class="sl">Never deliver early</div><div class="sd">The handoff boundary stays inside the Abode until the moment is right.</div></div><div class="switch on" onclick="this.classList.toggle('on')"><i></i></div></div>
+    </div>`;
+}
+
+/* ============================================================
+   CANVAS PAN
+   ============================================================ */
+let pan={x:0,y:0}, dragging=false, spaceDown=false, start={x:0,y:0};
+const wrap=document.getElementById('canvasWrap');
+function applyPan(){canvas.style.transform=`translate(${pan.x}px,${pan.y}px)`;}
+window.addEventListener('keydown',e=>{if(e.code==='Space'){spaceDown=true;wrap.style.cursor='grab';if(e.target===document.body)e.preventDefault();}
+  if(e.key==='Escape'){ if(document.getElementById('nodeview').classList.contains('open')) closeNode(); }});
+window.addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;wrap.style.cursor='';}});
+wrap.addEventListener('pointerdown',e=>{
+  if(spaceDown||e.button===1){ dragging=true; canvas.classList.add('panning');
+    start={x:e.clientX-pan.x,y:e.clientY-pan.y}; wrap.setPointerCapture(e.pointerId); e.preventDefault(); }
+});
+wrap.addEventListener('pointermove',e=>{ if(dragging){ pan.x=e.clientX-start.x; pan.y=e.clientY-start.y; applyPan(); }});
+wrap.addEventListener('pointerup',e=>{ dragging=false; canvas.classList.remove('panning'); });
+
+/* ============================================================
+   COMMAND BAR
+   ============================================================ */
+function submitCmd(){
+  const inp=document.getElementById('cmdInput');
+  const v=inp.value.trim(); if(!v)return;
+  ingest(v); inp.value='';
+  setCtxNow(`Otto handed your signal to <b>Ingestion</b> to parse and hold.`, false);
+}
+document.getElementById('cmdSend').addEventListener('click',submitCmd);
+document.getElementById('cmdInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitCmd();});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+window.__ottoResume=function(){ if(window.__ottoStopped){window.__ottoPause=false;window.__ottoStopped=false;requestAnimationFrame(frame);} };
+let resizeT;
+window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{computeLayout();applyLayout();},160);});
+function boot(){
+  buildCanvas();
+  const wrap=document.getElementById('canvasWrap');
+  otto.x=Math.max(90,wrap.clientWidth*0.22); otto.y=wrap.clientHeight-96;
+  otto.tx=otto.x; otto.ty=otto.y;
+  AGENTS.forEach(pickAgentTarget);
+  renderPriorities(); renderQueue();
+  addLog('ingestion','Boot — pulled 4 held commitments into the rolling buffer.','ST::init · 4');
+  addLog('pattern','Idle scan complete — 6 stable behavioural patterns loaded into the model.','LT::6 nodes');
+  setCtxNow('Otto is online — supervising 4 workers across 2 memory timescales.', false);
+  requestAnimationFrame(frame);
+  // loops
+  setInterval(ottoSupervise, 5200);
+  setTimeout(ottoSupervise, 1200);
+  setInterval(tick, 4200);
+  setInterval(()=>{ if(Math.random()<0.6) ingest(); }, 7000);
+  setInterval(maybeDrift, 9000);
+  setView('workplace');
+}
+boot();
+</script>
+</body>
+</html>

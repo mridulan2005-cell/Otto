@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Today</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper:   #faf9f5;
+    --taupe:   #6a6665;
+    --ink:     #3a3838;
+    --line:    rgba(106, 102, 101, 0.31);
+    --line-soft: rgba(106, 102, 101, 0.25);
+    --muted:   rgba(106, 102, 101, 0.55);
+    --muted-2: rgba(106, 102, 101, 0.74);
+    --due-red: #e07474;
+    --due-amber: #e0b174;
+    --due-green: #8bbd8b;
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    font-family: 'Raleway', 'Segoe UI', system-ui, sans-serif;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  /* The card itself, with the entrance animation. The window leaves 32px of
+     transparent space all around (SHADOW_PAD in main.js) so this soft shadow
+     has room to fall without being clipped at the window edge. */
+  #card {
+    position: absolute;
+    inset: 32px;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(40, 38, 38, 0.13),
+                0 2px 6px rgba(40, 38, 38, 0.07);
+    display: flex;
+    flex-direction: column;
+    padding: 22px 22px 18px;
+    transform-origin: 90% 100%;
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    transition: opacity 200ms ease, transform 220ms cubic-bezier(.2,.8,.2,1);
+  }
+  #card.in  { opacity: 1; transform: translateY(0) scale(1); }
+  #card.out { opacity: 0; transform: translateY(10px) scale(0.98); }
+
+  header { border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .date {
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--taupe);
+    letter-spacing: 0.1px;
+  }
+  .greeting {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.35;
+    color: var(--muted);
+    margin: 14px 0 4px;
+  }
+
+  .tasks {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .tasks::-webkit-scrollbar { width: 6px; }
+  .tasks::-webkit-scrollbar-thumb { background: var(--line-soft); border-radius: 6px; }
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 2px;
+  }
+  .task + .task { border-top: 1px solid rgba(106,102,101,0.10); }
+  .flag { flex: 0 0 auto; margin-top: 3px; color: var(--ink); }
+  .body { flex: 1; min-width: 0; }
+  .title {
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .source {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--muted-2);
+  }
+  .source svg { opacity: 0.75; }
+
+  .due {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 4px 12px;
+    border-radius: 65px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--paper);
+    white-space: nowrap;
+  }
+  .due.red   { background: var(--due-red); }
+  .due.amber { background: var(--due-amber); }
+  .due.green { background: var(--due-green); }
+
+  .ask {
+    margin-top: 14px;
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .ask input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .ask input::placeholder { color: rgba(58, 56, 56, 0.44); }
+</style>
+</head>
+<body>
+  <div id="card">
+    <header>
+      <div class="date" id="date">Today</div>
+    </header>
+    <p class="greeting" id="greeting">Here’s what you’ve got for today.</p>
+    <ul class="tasks" id="tasks"></ul>
+    <div class="ask">
+      <input id="ask" type="text" placeholder="Tell me anything" autocomplete="off" />
+    </div>
+  </div>
+
+<script>
+  // The priority flag + external-link glyphs, inlined as SVG so the panel has
+  // no remote asset dependencies.
+  const FLAG = `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 1 L14 1 L10 7 L14 13 L2 13 Z" fill="currentColor"/>
+    <rect x="0.5" y="1" width="2" height="18" rx="1" fill="currentColor"/>
+  </svg>`;
+  const LINKOUT = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 4h6v6"/><path d="M20 4l-8 8"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/>
+  </svg>`;
+
+  // Sample priorities — matches the Figma comp. Edit this list freely; in a
+  // real build Otto would hand these over from the Aging / Escalation queue.
+  const PRIORITIES = [
+    { title: 'Devcom deliverables sheet fillin', source: 'google spreadsheets', due: 'due 5:00 today', tone: 'red' },
+    { title: 'Lock the design system with Maya',  source: 'figma',               due: 'due 6:00 today', tone: 'amber' },
+    { title: 'Mentorship check-in — R. Khanna',   source: 'calendar',            due: 'this evening',   tone: 'amber' },
+    { title: 'Review the open PRs',               source: 'github',              due: 'today',          tone: 'green' },
+  ];
+
+  function render() {
+    const ul = document.getElementById('tasks');
+    ul.innerHTML = '';
+    for (const p of PRIORITIES) {
+      const li = document.createElement('li');
+      li.className = 'task';
+      li.innerHTML = `
+        <span class="flag">${FLAG}</span>
+        <div class="body">
+          <div class="title">${escape(p.title)}</div>
+          <div class="source">${escape(p.source)} ${LINKOUT}</div>
+        </div>
+        <span class="due ${p.tone}">${escape(p.due)}</span>`;
+      ul.appendChild(li);
+    }
+  }
+  function escape(s) {
+    return String(s).replace(/[&<>"]/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  const card = document.getElementById('card');
+  const ask = document.getElementById('ask');
+
+  render();
+
+  window.otto.onShow((data) => {
+    document.getElementById('date').textContent = data.dateLabel || 'Today';
+    const name = 'mimi';
+    document.getElementById('greeting').textContent =
+      `${data.greeting || 'Hi'}, ${name} <3. Here’s what you’ve got for today. Correct me if I’m wrong!`;
+    card.classList.remove('out');
+    // next frame so the transition actually plays
+    requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('in')));
+  });
+
+  window.otto.onHide(() => {
+    card.classList.remove('in');
+    card.classList.add('out');
+  });
+
+  // Esc or Enter (after typing) dismisses; clicking away is handled by the
+  // window 'blur' in main.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') window.otto.dismiss();
+    if (e.key === 'Enter' && document.activeElement === ask) {
+      ask.value = '';
+      ask.blur();
+      window.otto.dismiss();
+    }
+  });
+</script>
+</body>
+</html>

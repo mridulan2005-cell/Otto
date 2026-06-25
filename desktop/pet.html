@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Otto</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+  #stage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: end center;
+    /* Otto bobs gently like he's breathing */
+    animation: bob 3.4s ease-in-out infinite;
+  }
+  #otto {
+    width: 52px;
+    height: auto;
+    image-rendering: auto;
+    filter: drop-shadow(0 3px 4px rgba(40, 38, 38, 0.30));
+    transform-origin: 50% 100%;
+    transition: transform 120ms ease;
+  }
+  /* squash-on-press feedback */
+  #stage.press #otto { transform: scaleX(1.06) scaleY(0.94); }
+  /* a little hop when Otto surfaces your priorities */
+  #stage.happy { animation: hop 0.6s ease; }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
+  @keyframes hop {
+    0%   { transform: translateY(0); }
+    30%  { transform: translateY(-10px); }
+    55%  { transform: translateY(0); }
+    70%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <img id="otto" alt="Otto" />
+  </div>
+<script>
+  const img = document.getElementById('otto');
+  const stage = document.getElementById('stage');
+  const f = (n) => `sprites/f${n}.png`;
+
+  // Frame vocabulary for the refined sprite set.
+  const NEUTRAL = [10, 11, 15, 16, 21, 23]; // eyes wide, facing forward
+  const LOOK    = [17, 18, 19, 20, 22];      // glances / head tilts
+  const SLEEPY  = 14;                         // lids lowered
+  const SMILE   = 12;                         // happy closed-eye smile
+  const BLINK   = [SLEEPY, SMILE, SLEEPY];    // quick close-and-open
+
+  // Preload every frame so the animation never flickers.
+  [...new Set([...NEUTRAL, ...LOOK, 12, 13, 14])].forEach((n) => {
+    const p = new Image();
+    p.src = f(n);
+  });
+
+  let base = 11;            // current resting frame
+  img.src = f(base);
+
+  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function playFrames(frames, hold) {
+    for (const fr of frames) {
+      img.src = f(fr);
+      await wait(hold);
+    }
+    img.src = f(base);
+  }
+
+  async function blink() {
+    await playFrames(BLINK, 75);
+  }
+
+  async function lookAround() {
+    img.src = f(rand(LOOK));
+    await wait(900 + Math.random() * 700);
+    img.src = f(base);
+  }
+
+  // The idle "brain": mostly still, with the occasional blink or glance,
+  // so Otto feels alive without being distracting.
+  let busy = false;
+  async function tick() {
+    if (!busy) {
+      busy = true;
+      const roll = Math.random();
+      if (roll < 0.6) {
+        await blink();
+      } else if (roll < 0.85) {
+        await lookAround();
+      } else {
+        base = rand(NEUTRAL); // settle into a slightly different rest pose
+        img.src = f(base);
+      }
+      busy = false;
+    }
+    setTimeout(tick, 1600 + Math.random() * 2600);
+  }
+  tick();
+
+  // Click -> ask main to toggle the priorities panel.
+  document.body.addEventListener('mousedown', () => stage.classList.add('press'));
+  document.body.addEventListener('mouseup', () => stage.classList.remove('press'));
+  document.body.addEventListener('click', () => window.otto.click());
+
+  // Reactions driven by the main process.
+  window.otto.onState((state) => {
+    if (state === 'happy') {
+      stage.classList.remove('happy');
+      void stage.offsetWidth; // restart animation
+      stage.classList.add('happy');
+      img.src = f(SMILE);
+      setTimeout(() => { img.src = f(base); }, 650);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "ottos-abode-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Otto — a desktop companion that hovers over the taskbar and surfaces your priorities for the day.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}
